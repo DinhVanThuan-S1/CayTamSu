@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, PenTool, BookOpen, TreeDeciduous, Heart, ArrowDown } from "lucide-react";
+import { Sparkles, PenTool, TreeDeciduous, Heart, ArrowDown } from "lucide-react";
 import CanvasBackground from "@/components/CanvasBackground";
 import TopNavigation from "@/components/TopNavigation";
 import ConfessionTree from "@/components/ConfessionTree";
@@ -41,7 +41,9 @@ export default function Home() {
   // 1. Initialize day/night according to local hour & Load Initial Data
   useEffect(() => {
     const hour = new Date().getHours();
-    setIsNight(hour < 6 || hour >= 18);
+    setTimeout(() => {
+      setIsNight(hour < 6 || hour >= 18);
+    }, 0);
 
     const loadInitialData = async () => {
       try {
@@ -210,7 +212,7 @@ export default function Home() {
             transition={{ delay: 0.3, duration: 0.6 }}
             className="text-sm md:text-lg font-medium text-gray-600 dark:text-gray-300 leading-relaxed font-sans italic max-w-xl mx-auto"
           >
-            "Nơi những tâm sự được gửi vào gió và nở thành ký ức."
+            &ldquo;Nơi những tâm sự được gửi vào gió và nở thành ký ức.&rdquo;
           </motion.p>
 
           {/* Action buttons with high-end glows */}

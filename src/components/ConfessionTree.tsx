@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { Sparkles, Lock } from "lucide-react";
+import { Lock } from "lucide-react";
 
 interface Confession {
   id: string;
@@ -109,7 +109,6 @@ export default function ConfessionTree({
 
   // Determine tree scaling & opacity levels based on progression
   const scale = 0.8 + Math.min(0.4, treeLevel * 0.1);
-  const leafCountFactor = treeLevel; // 1 to 5
 
   // Generate branches paths for SVG dynamically based on tree level
   const showSprout = treeLevel === 1;
@@ -123,7 +122,7 @@ export default function ConfessionTree({
       
       {/* GLOWING AURA around tree (increases with love energy & legend levels) */}
       <div
-        className={`absolute inset-0 rounded-full blur-[100px] opacity-25 transition-all duration-1000 ${
+        className={`absolute inset-0 rounded-full blur-[100px] transition-all duration-1000 ${
           isNight
             ? showLegend
               ? "bg-violet-600/50 shadow-[0_0_120px_rgba(167,139,250,0.4)]"
@@ -132,7 +131,10 @@ export default function ConfessionTree({
             ? "bg-pink-400/40 shadow-[0_0_120px_rgba(244,63,94,0.3)]"
             : "bg-rose-300/25"
         }`}
-        style={{ transform: `scale(${scale})` }}
+        style={{ 
+          transform: `scale(${scale})`,
+          opacity: Math.min(0.8, 0.25 + (loveEnergy * 0.005))
+        }}
       />
 
       {/* SVG TREE DRAWING */}

@@ -23,7 +23,6 @@ interface Confession {
 export default function MemoryPage() {
   const [isNight, setIsNight] = useState(false);
   const [confessions, setConfessions] = useState<Confession[]>([]);
-  const [filteredConfessions, setFilteredConfessions] = useState<Confession[]>([]);
 
   // Stats
   const [totalLetters, setTotalLetters] = useState(0);
@@ -40,62 +39,41 @@ export default function MemoryPage() {
   const [selectedConfessionId, setSelectedConfessionId] = useState<string | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
 
-  // 1. Initial Load & Theme detection
+  // 1. Initial Load & Theme detection & Data Fetching
   useEffect(() => {
     const hour = new Date().getHours();
-    setIsNight(hour < 6 || hour >= 18);
+    setTimeout(() => {
+      setIsNight(hour < 6 || hour >= 18);
+    }, 0);
 
-    const loadData = async () => {
+    const loadInitialData = async () => {
       try {
         const confRes = await fetch("/api/confessions");
         if (confRes.ok) {
           const confData = await confRes.json();
-          // For memory list, we want to fetch full content, so `/api/confessions` endpoint returns full content when queried or does GET. In our `/api/confessions` Route Handler GET method, if no ID is passed, we select all records.
-          // Wait, let's verify if our `/api/confessions` GET returns content when no ID is passed!
-          // Ah! Let's check `api/confessions/route.ts` GET method:
-          // We selected: `id`, `author`, `emoji`, `emotion`, `color`, `positionX`, `positionY`, `branchIndex`, `unlockAt`, `isStarOfHope`. We forgot to include `content`, `createdAt`, `likesCount`, and `anonymous` in the SELECT!
-          // Oh! That is a very important detail! If the list API doesn't select `content`, then the Memory page won't be able to display or search confession contents!
-          // Let's fix that immediately! In `/api/confessions/route.ts`, let's make sure the GET method selects ALL required fields for both tree and list, or we can just fetch all fields without selecting specific columns (which is standard and very clean!). Yes! Let's rewrite `src/app/api/confessions/route.ts` to return ALL fields of confessions when list is called! This is much simpler, avoids select errors, and is perfectly suitable for SQLite/SQLite lists!
-          // Let's do that in a moment. Let's finish the page loading code here first.
+          setConfessions(confData.confessions || []);
+        }
+
+        const stateRes = await fetch("/api/tree-state");
+        if (stateRes.ok) {
+          const stateData = await stateRes.json();
+          const state = stateData.treeState;
+          if (state) {
+            setTotalLetters(state.totalLetters);
+            setLoveEnergy(state.totalLoveEnergy);
+            setTreeLevel(state.treeLevel);
+          }
         }
       } catch (err) {
         console.error("Lỗi khi tải dữ liệu Ký ức:", err);
       }
     };
 
-    loadData();
+    loadInitialData();
   }, []);
 
-  // Fetch full details
-  const refreshStatsAndConfessions = async () => {
-    try {
-      const confRes = await fetch("/api/confessions");
-      if (confRes.ok) {
-        const confData = await confRes.json();
-        setConfessions(confData.confessions || []);
-      }
-
-      const stateRes = await fetch("/api/tree-state");
-      if (stateRes.ok) {
-        const stateData = await stateRes.json();
-        const state = stateData.treeState;
-        if (state) {
-          setTotalLetters(state.totalLetters);
-          setLoveEnergy(state.totalLoveEnergy);
-          setTreeLevel(state.treeLevel);
-        }
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  useEffect(() => {
-    refreshStatsAndConfessions();
-  }, []);
-
-  // 2. Perform Filtering and Sorting on client side
-  useEffect(() => {
+  // 2. Perform Filtering and Sorting on client side dynamically during render
+  const filteredConfessions = (() => {
     let result = [...confessions];
 
     // Search filter
@@ -130,8 +108,8 @@ export default function MemoryPage() {
       result.sort((a, b) => b.likesCount - a.likesCount);
     }
 
-    setFilteredConfessions(result);
-  }, [confessions, searchTerm, emotionFilter, anonymousFilter, sortOrder]);
+    return result;
+  })();
 
   const handleReact = async (id: string, type: string) => {
     try {
@@ -213,7 +191,7 @@ export default function MemoryPage() {
             Khu Vườn Ký Ức
           </h1>
           <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 font-medium font-sans italic">
-            "Nơi lưu giữ vĩnh hằng những rung động chân thành nhất."
+            &ldquo;Nơi lưu giữ vĩnh hằng những rung động chân thành nhất.&rdquo;
           </p>
         </div>
 
@@ -342,7 +320,7 @@ export default function MemoryPage() {
                       </div>
                     ) : (
                       <p className="text-xs md:text-sm text-gray-600 dark:text-slate-50 line-clamp-4 font-sans italic break-words select-text pt-1">
-                        "{c.content}"
+                        &ldquo;{c.content}&rdquo;
                       </p>
                     )}
                   </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Heart, MessageSquare, Send, Calendar, Clock, Lock, Sparkles } from "lucide-react";
 
@@ -47,6 +47,7 @@ export default function DetailModal({
   const [commentContent, setCommentContent] = useState("");
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [floatingHearts, setFloatingHearts] = useState<{ id: number; x: number; y: number }[]>([]);
+  const heartIdCounter = useRef(0);
 
   // Fetch confession details when opened
   useEffect(() => {
@@ -81,7 +82,8 @@ export default function DetailModal({
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    const id = Date.now() + Math.random();
+    heartIdCounter.current += 1;
+    const id = heartIdCounter.current;
     setFloatingHearts((prev) => [...prev, { id, x, y }]);
     setTimeout(() => {
       setFloatingHearts((prev) => prev.filter((h) => h.id !== id));
@@ -205,7 +207,7 @@ export default function DetailModal({
                   ) : (
                     /* The actual text (Healing and Romantic style) */
                     <div className="py-2 text-sm md:text-base leading-relaxed text-gray-700 dark:text-slate-50 select-text font-sans italic break-words">
-                      "{confession.content}"
+                      &ldquo;{confession.content}&rdquo;
                     </div>
                   )}
                 </div>

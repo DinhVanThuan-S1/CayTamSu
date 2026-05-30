@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Send, User, Sparkles, Calendar, HelpCircle } from "lucide-react";
+import { X, Send, User, Sparkles, Calendar } from "lucide-react";
 import { analyzeEmotion } from "../lib/emotion";
 
 interface ConfessionFormProps {
@@ -36,7 +36,6 @@ export default function ConfessionForm({ isOpen, onClose, onSubmit }: Confession
   const [anonymous, setAnonymous] = useState(true);
   const [color, setColor] = useState("pink");
   const [emoji, setEmoji] = useState("🌸");
-  const [unlockAt, setUnlockAt] = useState<string | null>(null);
   
   const [lockType, setLockType] = useState("none"); // none, 1m, 6m, 1y, custom
   const [customLockDate, setCustomLockDate] = useState("");
@@ -46,35 +45,18 @@ export default function ConfessionForm({ isOpen, onClose, onSubmit }: Confession
   const [aiDetected, setAiDetected] = useState<string | null>(null);
 
   // Dynamic Local AI Emotion classification as user writes!
-  useEffect(() => {
-    if (!content.trim()) {
+  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const val = e.target.value;
+    setContent(val);
+    if (!val.trim()) {
       setAiDetected(null);
       return;
     }
-    const result = analyzeEmotion(content);
+    const result = analyzeEmotion(val);
     setAiDetected(result.emotion);
     setColor(result.color);
     setEmoji(result.emoji);
-  }, [content]);
-
-  // Handle future lock date calculation
-  useEffect(() => {
-    const now = new Date();
-    if (lockType === "none") {
-      setUnlockAt(null);
-    } else if (lockType === "1m") {
-      now.setMonth(now.getMonth() + 1);
-      setUnlockAt(now.toISOString());
-    } else if (lockType === "6m") {
-      now.setMonth(now.getMonth() + 6);
-      setUnlockAt(now.toISOString());
-    } else if (lockType === "1y") {
-      now.setFullYear(now.getFullYear() + 1);
-      setUnlockAt(now.toISOString());
-    } else if (lockType === "custom" && customLockDate) {
-      setUnlockAt(new Date(customLockDate).toISOString());
-    }
-  }, [lockType, customLockDate]);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,6 +72,21 @@ export default function ConfessionForm({ isOpen, onClose, onSubmit }: Confession
       return;
     }
 
+    let calculatedUnlockAt: string | null = null;
+    const now = new Date();
+    if (lockType === "1m") {
+      now.setMonth(now.getMonth() + 1);
+      calculatedUnlockAt = now.toISOString();
+    } else if (lockType === "6m") {
+      now.setMonth(now.getMonth() + 6);
+      calculatedUnlockAt = now.toISOString();
+    } else if (lockType === "1y") {
+      now.setFullYear(now.getFullYear() + 1);
+      calculatedUnlockAt = now.toISOString();
+    } else if (lockType === "custom" && customLockDate) {
+      calculatedUnlockAt = new Date(customLockDate).toISOString();
+    }
+
     setIsSubmitting(true);
     try {
       await onSubmit({
@@ -98,7 +95,7 @@ export default function ConfessionForm({ isOpen, onClose, onSubmit }: Confession
         anonymous,
         color,
         emoji,
-        unlockAt,
+        unlockAt: calculatedUnlockAt,
       });
 
       // Clear Form on Success
@@ -218,7 +215,7 @@ export default function ConfessionForm({ isOpen, onClose, onSubmit }: Confession
                   rows={4}
                   placeholder="Hãy viết ra những suy tư, lời chúc, kỉ niệm buồn vui hoặc những tình cảm giấu kín đang chất chứa trong lòng..."
                   value={content}
-                  onChange={(e) => setContent(e.target.value)}
+                  onChange={handleContentChange}
                   maxLength={500}
                   className="w-full text-sm p-3.5 rounded-xl bg-white/30 dark:bg-black/20 border border-gray-300/30 outline-none focus:border-pink-400 dark:focus:border-pink-500 text-gray-800 dark:text-gray-100 resize-none"
                 />

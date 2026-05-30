@@ -1,0 +1,57 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // Set to "postgresql" for Neon/Supabase in production, or keep "sqlite" for simple zero-config local run
+  url      = env("DATABASE_URL")
+}
+
+model Confession {
+  id           String     @id @default(uuid())
+  author       String     @default("Ẩn danh")
+  content      String
+  anonymous    Boolean    @default(true)
+  emoji        String     @default("🌸")
+  emotion      String     @default("Biết ơn") // Vui vẻ, Hạnh phúc, Buồn, Cô đơn, Nhớ nhung, Hy vọng, Biết ơn
+  color        String     @default("pink") // pink, rose, purple, violet, blue, gold, emerald
+  createdAt    DateTime   @default(now())
+  unlockAt     DateTime?  // Future letter unlock date
+  positionX    Float      // X coordinate (%) on the tree
+  positionY    Float      // Y coordinate (%) on the tree
+  branchIndex  Int        // Which branch it belongs to
+  likesCount   Int        @default(0)
+  
+  comments     Comment[]
+  reactions    Reaction[]
+}
+
+model Comment {
+  id           String     @id @default(uuid())
+  confessionId String
+  author       String     @default("Ẩn danh")
+  content      String
+  createdAt    DateTime   @default(now())
+  
+  confession   Confession @relation(fields: [confessionId], references: [id], onDelete: Cascade)
+}
+
+model Reaction {
+  id           String     @id @default(uuid())
+  confessionId String
+  type         String     // ❤️, 💖, 🥰, 🌸, ✨
+  createdAt    DateTime   @default(now())
+  
+  confession   Confession @relation(fields: [confessionId], references: [id], onDelete: Cascade)
+}
+
+model TreeState {
+  id              String   @id @default("global-tree")
+  totalLetters    Int      @default(0)
+  totalLoveEnergy Int      @default(0)
+  treeLevel       Int      @default(1) // 1: Mầm non, 2: Cây nhỡ, 3: Cây lớn, 4: Rực rỡ, 5: Huyền thoại
+  updatedAt       DateTime @updatedAt
+}

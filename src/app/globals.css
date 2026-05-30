@@ -1,0 +1,82 @@
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+  --font-sans: 'Quicksand', var(--font-outfit), sans-serif;
+  --font-outfit: var(--font-outfit);
+}
+
+:root {
+  --background: #fff8f8;
+  --foreground: #1e1e24;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Quicksand', var(--font-outfit), sans-serif;
+  overflow-x: hidden;
+  transition: background-color 1s ease, color 0.5s ease;
+}
+
+/* ==================== DYNAMIC KEYFRAME ANIMATIONS ==================== */
+
+/* Gentle swaying for the branches & trunk */
+@keyframes treeSway {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(1.2deg);
+  }
+}
+
+.animate-tree-sway {
+  animation: treeSway 6s ease-in-out infinite;
+}
+
+/* Soft fade-in for tooltips, modals */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -40%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Custom glow utility for dark mode cards */
+.glow-card-pink {
+  box-shadow: 0 0 20px rgba(244, 63, 94, 0.15);
+}
+
+.glow-card-violet {
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.15);
+}
+
+/* Custom scrollbar to keep it sleek and romantic */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(244, 63, 94, 0.2);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(244, 63, 94, 0.4);
+}

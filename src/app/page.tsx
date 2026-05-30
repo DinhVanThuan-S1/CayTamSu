@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, PenTool, BookOpen, TreeDeciduous, Heart, ArrowDown } from "lucide-react";
 import CanvasBackground from "@/components/CanvasBackground";
 import TopNavigation from "@/components/TopNavigation";
@@ -34,6 +34,7 @@ export default function Home() {
   const [selectedConfessionId, setSelectedConfessionId] = useState<string | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [newlyAddedId, setNewlyAddedId] = useState<string | null>(null);
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
 
   const treeSectionRef = useRef<HTMLDivElement | null>(null);
 
@@ -130,6 +131,12 @@ export default function Home() {
     setLoveEnergy(data.totalLoveEnergy);
     setTreeLevel(data.treeLevel);
     setNewlyAddedId(newConf.id);
+
+    // Trigger success notification banner
+    setShowSuccessAlert(true);
+    setTimeout(() => {
+      setShowSuccessAlert(false);
+    }, 5000);
 
     // Clear newlyAddedId after 3 seconds
     setTimeout(() => {
@@ -319,6 +326,32 @@ export default function Home() {
         onReact={handleReact}
         onAddComment={handleAddComment}
       />
+
+      {/* Success Alert Banner */}
+      <AnimatePresence>
+        {showSuccessAlert && (
+          <motion.div
+            initial={{ opacity: 0, y: -50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.9 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            className="fixed top-20 right-4 md:right-8 w-full max-w-sm overflow-hidden rounded-2xl bg-white/80 dark:bg-gray-900/90 backdrop-blur-xl border border-pink-200/30 dark:border-white/5 shadow-2xl p-4 flex items-center space-x-3.5 z-50 pointer-events-auto cursor-pointer select-none"
+            onClick={() => setShowSuccessAlert(false)}
+          >
+            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-pink-100 dark:bg-pink-900/40 text-pink-500 flex-shrink-0 animate-bounce">
+              🌸
+            </div>
+            <div className="flex-1">
+              <h4 className="text-xs font-bold text-pink-600 dark:text-pink-400 uppercase tracking-wider">
+                Gửi gió thành công!
+              </h4>
+              <p className="text-[11px] font-semibold text-gray-600 dark:text-gray-300 mt-0.5 leading-relaxed">
+                Tâm sự của bạn đã được gửi vào gió thành công và được treo đung đưa nhẹ trên cành cây! ✨
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

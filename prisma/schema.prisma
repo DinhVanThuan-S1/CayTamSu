@@ -6,8 +6,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql" // Set to "postgresql" for Neon/Supabase in production, or keep "sqlite" for simple zero-config local run
-  url      = env("DATABASE_URL")
+  provider  = "postgresql" // Set to "postgresql" for Neon/Supabase in production, or keep "sqlite" for simple zero-config local run
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Confession {
